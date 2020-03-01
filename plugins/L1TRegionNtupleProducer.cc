@@ -38,7 +38,7 @@ L1TRegionNtupleProducer::L1TRegionNtupleProducer( const ParameterSet & cfg ) :
     //recoPt_              = cfg.getParameter<double>("recoPtCut");
     folder               = tfs_->mkdir(folderName_);
     //folder->cd();
-    regionTree = folder.make<TTree>("EfficiencyTree", "Efficiency Tree");
+    regionTree = folder.make<TTree>("RegionTree", "Region Tree");
     regionTree->Branch("run",        &run,     "run/I");
     regionTree->Branch("lumi",       &lumi,    "lumi/I");
     regionTree->Branch("event",      &event,   "event/I");

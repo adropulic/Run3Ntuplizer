@@ -15,6 +15,12 @@
 #include "TTree.h"
 #include "TFile.h"
 
+//include TMVA
+
+#include "TMVA/Tools.h"
+#include "TMVA/Reader.h"
+#include "TMVA/MethodCuts.h"
+
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
@@ -158,6 +164,10 @@ class Run3Ntuplizer : public edm::EDAnalyzer {
   edm::EDGetTokenT<vector <l1extra::L1JetParticle> > forwardJets_;
   edm::EDGetTokenT<vector <reco::GenJet> > genJets_;
 
+  /* Create the Reader object. */
+  TMVA::Reader *reader;
+  //TMVA::Reader *reader = new TMVA::Reader("!Color:Silent");
+
   std::string folderName_;
 
   double jetPt, jetEta, jetPhi;
@@ -188,6 +198,7 @@ class Run3Ntuplizer : public edm::EDAnalyzer {
   double recoPt_;
   bool isData_;
   int l1MatchedAK8;
+  float bdtDiscriminant;
 
 
 	 

@@ -17,6 +17,10 @@
 #include "DataFormats/TauReco/interface/PFTau.h"
 #include "DataFormats/Common/interface/RefToPtr.h"
 
+/* TMVA */
+#include "TMVA/Tools.h"
+#include "TMVA/Reader.h"
+#include "TMVA/MethodCuts.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 #include <iostream>
@@ -46,7 +50,7 @@ Run3Ntuplizer::Run3Ntuplizer( const ParameterSet & cfg ) :
     isData_              = cfg.getParameter<bool>("isData");
     folder               = tfs_->mkdir(folderName_);
     //folder->cd();
-    regionTree = folder.make<TTree>("EfficiencyTree", "Efficiency Tree");
+    regionTree = folder.make<TTree>("RegionTree", "Region Tree");
     regionTree->Branch("run",        &run,     "run/I");
     regionTree->Branch("lumi",       &lumi,    "lumi/I");
     regionTree->Branch("event",      &event,   "event/I");
@@ -145,6 +149,7 @@ void Run3Ntuplizer::createBranches(TTree *tree){
     tree->Branch("l1Matched_2",   &l1Matched_2, "l1Matched_2/I");
     tree->Branch("nRecoJets",     &nRecoJets,    "nRecoJets/I");
     tree->Branch("nL1Jets",       &nL1Jets,      "nL1Jets/I");
+    tree->Branch("bdtDiscriminant", &bdtDiscriminant, "bdtDiscriminant/F");
 
   }
 
@@ -176,6 +181,34 @@ void Run3Ntuplizer::beginJob( const EventSetup & es) {
 
 void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
  {
+//I think I should add the Reader here? Might as well. Before looking through the events.
+   /* Load the library */
+   TMVA::Tools::Instance();
+
+   /* Variable for declaring MVA methods to be tested */
+   std::map<std::string,int> Use;
+
+   Use["BDT"] = 1;
+
+   /* Create the Reader object. */
+   reader = new TMVA::Reader("!Color:Silent");
+   //looks like these have to be floats or ints  based on the documentation of AddVariable
+   Float_t l1Pt_1;
+   Float_t l1Pt_2;
+   Float_t l1DeltaEta;
+   Float_t l1DeltaPhi;
+   Float_t l1Mass;
+
+   reader->AddVariable("l1Pt_1", &l1Pt_1);
+   reader->AddVariable("l1Pt_2", &l1Pt_2);
+   reader->AddVariable("l1DeltaEta", &l1DeltaEta);
+   reader->AddVariable("l1DeltaPhi", &l1DeltaPhi);
+   reader->AddVariable("l1Mass",    &l1Mass);
+
+   reader->BookMVA( "BDT classifier", "/afs/cern.ch/user/a/addropul/CMSSW_10_6_0_pre4/src/L1Trigger/Run3Ntuplizer/test/June_July_2019/dataset/weights/TMVAClassification_BDT.weights.xml" );
+//Note, can iterate through mulitple methods using code in applyWeightFiles.C
+//want to evaluate BDT using these events, and then book the bdt discriminant in the tree
+
    std::cout<<"Analyzing..."<<std::endl;
    nEvents->Fill(1);
    
@@ -418,9 +451,24 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
     
     nRecoJets = goodJets.size();
     nL1Jets = l1JetsSorted.size();
+//I guess I should evaluate BDT here? Ok: so should funnel all relevant quantities into vector call "event" and evaluate the BDT on that 
+    float bdtDiscriminant = -9.9;
+    std::vector<float> event;
+
+    event.push_back(l1Pt_1); 
+    event.push_back(l1Pt_2);
+    event.push_back(l1DeltaEta);
+    event.push_back(l1DeltaPhi);
+    event.push_back(l1Mass);
+
+    bdtDiscriminant = reader->EvaluateMVA(event, "BDT classifier");
+    std::cout<<"bdtDiscriminant: "<<bdtDiscriminant<<std::endl;
+//now want to make this go into a branch of the tree
+//ok, now will try to run... but what should I run it on? I suppose just zero bias? I don't have like a full sample of anything...remember to change name of file
+//after that, efficiency plots
     efficiencyTree->Fill();
   }
-
+// I think I need to put the reader in up here ^^
   std::cout<<"making regions"<<std::endl;
   vRegionEt.clear();
   vRegionEta.clear();

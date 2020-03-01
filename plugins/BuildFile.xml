@@ -4,6 +4,7 @@
 <use   name="FWCore/Utilities"/>
 <use   name="FWCore/ServiceRegistry"/>
 <use   name="CommonTools/UtilAlgos"/>
+<use   name="CommonTools/MVAUtils"/>
 <use   name="DataFormats/EcalDigi"/>
 <use   name="DataFormats/EcalDetId"/>
 <use   name="DataFormats/HcalDigi"/>
