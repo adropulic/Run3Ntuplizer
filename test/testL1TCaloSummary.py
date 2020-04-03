@@ -67,7 +67,7 @@ process.load('EventFilter.L1TXRawToDigi.caloLayer1Stage2Digis_cfi')
 process.load('L1Trigger.L1TCaloSummary.uct2016EmulatorDigis_cfi')
 
 process.load("L1Trigger.Run3Ntuplizer.l1TRegionNtupleProducer_cfi")
-
+#process.load("L1Trigger.Run3Ntuplizer.l1TRun3Ntuplizer_cfi")
 process.uct2016EmulatorDigis.useECALLUT = cms.bool(False)
 process.uct2016EmulatorDigis.useHCALLUT = cms.bool(False)
 process.uct2016EmulatorDigis.useHFLUT = cms.bool(False)
@@ -113,7 +113,7 @@ process.out = cms.OutputModule("PoolOutputModule",
 #Output
 process.TFileService = cms.Service(
 	"TFileService",
-	fileName = cms.string("l1TNtuple.root")
+	fileName = cms.string("l1TNtuple_maybeZeroBias.root")
 )
 
 process.p = cms.Path(process.l1tCaloLayer1Digis*process.uct2016EmulatorDigis*process.l1NtupleProducer)

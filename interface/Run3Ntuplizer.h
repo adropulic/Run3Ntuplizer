@@ -38,7 +38,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-
+//#include "L1Trigger/Run3Ntuplizer/plugins/helpers.h"
 // GCT and RCT data formats
 #include "DataFormats/L1CaloTrigger/interface/L1CaloCollections.h"
 #include "DataFormats/L1GlobalCaloTrigger/interface/L1GctCollections.h"
@@ -106,7 +106,6 @@ class Run3Ntuplizer : public edm::EDAnalyzer {
 
   TH1F* regionHitEta;
   TH1F* regionHitPhi;
-  TTree* regionTree;
   TFileDirectory folder;
 
   TH1F* recoJet_pt;
@@ -117,9 +116,21 @@ class Run3Ntuplizer : public edm::EDAnalyzer {
   TH1F* recoJetAK8_eta;
   TH1F* recoJetAK8_phi;
 
+  TH1F* l1pt_all_1;
+  TH1F* l1pt_all_2;
+  TH1F* l1pt_tight_1;
+  TH1F* l1pt_tight_2;
+  TH1F* l1pt_medium_1;
+  TH1F* l1pt_medium_2;
+  TH1F* l1pt_loose_1;
+  TH1F* l1pt_loose_2;
+  TH1F* l1pt_veryloose_1;
+  TH1F* l1pt_veryloose_2;
+
   TTree* genTree;
   TTree* efficiencyTree;
   TTree* efficiencyTreeAK8;
+  TTree* regionTree;
 
   int run, lumi, event;
   float nvtx;
@@ -166,6 +177,12 @@ class Run3Ntuplizer : public edm::EDAnalyzer {
 
   /* Create the Reader object. */
   TMVA::Reader *reader;
+
+  Float_t l1Pt_1_f;
+  Float_t l1Pt_2_f;
+  Float_t l1DeltaEta_f;
+  Float_t l1DeltaPhi_f;
+  Float_t l1Mass_f;
   //TMVA::Reader *reader = new TMVA::Reader("!Color:Silent");
 
   std::string folderName_;
