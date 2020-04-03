@@ -82,6 +82,18 @@ Run3Ntuplizer::Run3Ntuplizer( const ParameterSet & cfg ) :
     recoJetAK8_eta  = folder.make<TH1F>( "recoJetAK8_eta"  , "eta", 100,  -3, 3. );
     recoJetAK8_phi  = folder.make<TH1F>( "recoJetAK8_phi"  , "phi", 100,  -4, 4. );
 
+    l1pt_tight_1   = folder.make<TH1F>( "l1pt_tight_1" , "p_{t}", 300,  0., 300. );
+    l1pt_medium_1   = folder.make<TH1F>( "l1pt_medium_1" , "p_{t}", 300,  0., 300. );
+    l1pt_loose_1   = folder.make<TH1F>( "l1pt_loose_1" , "p_{t}", 300,  0., 300. );
+    l1pt_veryloose_1   = folder.make<TH1F>( "l1pt_veryloose_1" , "p_{t}", 300,  0., 300. );
+    l1pt_all_1   = folder.make<TH1F>( "l1pt_all_1" , "p_{t}", 300,  0., 300. );
+
+    l1pt_tight_2   = folder.make<TH1F>( "l1pt_tight_2" , "p_{t}", 300,  0., 300. );
+    l1pt_medium_2   = folder.make<TH1F>( "l1pt_medium_2" , "p_{t}", 300,  0., 300. );
+    l1pt_loose_2   = folder.make<TH1F>( "l1pt_loose_2" , "p_{t}", 300,  0., 300. );
+    l1pt_veryloose_2   = folder.make<TH1F>( "l1pt_veryloose_2" , "p_{t}", 300,  0., 300. );
+    l1pt_all_2   = folder.make<TH1F>( "l1pt_all_2" , "p_{t}", 300,  0., 300. );
+
     efficiencyTreeAK8 = folder.make<TTree>("EfficiencyTreeAK8", "Efficiency Tree AK8");
     efficiencyTreeAK8->Branch("run",    &run,     "run/I");
     efficiencyTreeAK8->Branch("lumi",   &lumi,    "lumi/I");
@@ -104,9 +116,9 @@ Run3Ntuplizer::Run3Ntuplizer( const ParameterSet & cfg ) :
     createBranches(genTree);
     createBranchesGen(genTree);
 
-    efficiencyTree = folder.make<TTree>("efficiencyTree", "Reco Matched Jet Tree ");
+    efficiencyTree = folder.make<TTree>("efficiencyTree", "Gen Matched Jet Tree ");
     createBranches(efficiencyTree);
-
+    //std::cout<<"No error making the trees."<<std::endl;
   }
 
 
@@ -150,7 +162,7 @@ void Run3Ntuplizer::createBranches(TTree *tree){
     tree->Branch("nRecoJets",     &nRecoJets,    "nRecoJets/I");
     tree->Branch("nL1Jets",       &nL1Jets,      "nL1Jets/I");
     tree->Branch("bdtDiscriminant", &bdtDiscriminant, "bdtDiscriminant/F");
-
+    //std::cout<<"No error making the branches."<<std::endl;
   }
 
 void Run3Ntuplizer::createBranchesGen(TTree *tree){
@@ -181,35 +193,29 @@ void Run3Ntuplizer::beginJob( const EventSetup & es) {
 
 void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
  {
-//I think I should add the Reader here? Might as well. Before looking through the events.
-   /* Load the library */
-   TMVA::Tools::Instance();
-
-   /* Variable for declaring MVA methods to be tested */
-   std::map<std::string,int> Use;
-
-   Use["BDT"] = 1;
+//I think I should add the Reader here? Might as well. Before looking through the event
 
    /* Create the Reader object. */
    reader = new TMVA::Reader("!Color:Silent");
    //looks like these have to be floats or ints  based on the documentation of AddVariable
-   Float_t l1Pt_1;
-   Float_t l1Pt_2;
-   Float_t l1DeltaEta;
-   Float_t l1DeltaPhi;
-   Float_t l1Mass;
+   l1Pt_1_f = 0;
+   l1Pt_2_f = 0;
+   l1DeltaEta_f=0;
+   l1DeltaPhi_f=0;
+   l1Mass_f=0;
 
-   reader->AddVariable("l1Pt_1", &l1Pt_1);
-   reader->AddVariable("l1Pt_2", &l1Pt_2);
-   reader->AddVariable("l1DeltaEta", &l1DeltaEta);
-   reader->AddVariable("l1DeltaPhi", &l1DeltaPhi);
-   reader->AddVariable("l1Mass",    &l1Mass);
-
+   reader->AddVariable("l1Pt_1", &l1Pt_1_f);
+   reader->AddVariable("l1Pt_2", &l1Pt_2_f);
+   reader->AddVariable("l1DeltaEta", &l1DeltaEta_f);
+   reader->AddVariable("l1DeltaPhi", &l1DeltaPhi_f);
+   reader->AddVariable("l1Mass",    &l1Mass_f);
+   std::string CMSSW_BASE(getenv("CMSSW_BASE"));
    reader->BookMVA( "BDT classifier", "/afs/cern.ch/user/a/addropul/CMSSW_10_6_0_pre4/src/L1Trigger/Run3Ntuplizer/test/June_July_2019/dataset/weights/TMVAClassification_BDT.weights.xml" );
+ //  std::cout<<"Booked MVA method"<<std::endl;
 //Note, can iterate through mulitple methods using code in applyWeightFiles.C
 //want to evaluate BDT using these events, and then book the bdt discriminant in the tree
 
-   std::cout<<"Analyzing..."<<std::endl;
+  // std::cout<<"Analyzing..."<<std::endl;
    nEvents->Fill(1);
    
    run = evt.id().run();
@@ -280,7 +286,7 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
     std::cout<<"Error getting reco jets"<<std::endl;
 
   Handle<vector<pat::Jet> > jetsAK8;
-  
+  //std::cout<<"l1JetsSorted "<<l1JetsSorted.size()<<std::endl;
   if(evt.getByToken(jetSrcAK8_, jetsAK8)){//Begin Getting Reco Jets
     for (const pat::Jet &jetAK8 : *jetsAK8) {
       recoJetAK8_pt->Fill( jetAK8.pt() );
@@ -297,7 +303,7 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
     std::cout<<"Error getting AK8 jets"<<std::endl;
 
   zeroOutAllVariables();
-
+  //std::cout<<"Finished AK8 jet part"<<std::endl;
   //fill the jet variables here!
   //include delta eta between the two jets,
   // pt, eta, phi of each jet
@@ -308,6 +314,7 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
   reco::GenJet genJet_2;
   if(!isData_)
     if(genJets->size()>0){
+      //std::cout<<"size genJets "<<genJets->size()<<std::endl;
       genPt_1  = genJets->at(0).pt();
       genEta_1 = genJets->at(0).eta();
       genPhi_1 = genJets->at(0).phi();
@@ -359,14 +366,14 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
       int foundL1Jet_1 = 0;
       int foundL1Jet_2 = 0;
       for(auto jet : l1JetsSorted){
-      if(reco::deltaR(jet, genJet_1)<0.1 && foundL1Jet_1 == 0 ){
+      if(reco::deltaR(jet, genJet_1)<0.5 && foundL1Jet_1 == 0 ){
 	l1Pt_1  = jet.pt();
 	l1Eta_1 = jet.eta();
 	l1Phi_1 = jet.phi();
 	l1NthJet_1 = i;
 	foundL1Jet_1 = 1;
       }
-      if(genPt_2 > 0 && reco::deltaR(jet, genJet_2)<0.1 && foundL1Jet_2 == 0 ){
+      if(genPt_2 > 0 && reco::deltaR(jet, genJet_2)<0.5 && foundL1Jet_2 == 0 ){
 	l1Pt_2  = jet.pt();
 	l1Eta_2 = jet.eta();
 	l1Phi_2 = jet.phi();
@@ -387,8 +394,8 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
       nRecoJets = goodJets.size();
       nL1Jets = l1JetsSorted.size();
       genTree->Fill();
+     // std::cout<<"Filled genTree"<<std::endl;
     }
-  
  
   zeroOutAllVariables();
 
@@ -401,13 +408,18 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
   pat::Jet recoJet_1;
   pat::Jet recoJet_2;
   if(goodJets.size()>0){
-
+    //std::cout<<"size goodJets> 0 "<<goodJets.size()<<std::endl;
     recoPt_1  = goodJets.at(0).pt();
+    //std::cout<<"recoPt_1 "<<goodJets.at(0).pt()<<std::endl;
     recoEta_1 = goodJets.at(0).eta();
+    //std::cout<<"recoEta_1 "<<goodJets.at(0).eta()<<std::endl;
     recoPhi_1 = goodJets.at(0).phi();
+    //std::cout<<"recoPhi_1 "<<goodJets.at(0).phi()<<std::endl;
     recoJet_1 = goodJets.at(0);
+    //std::cout<<"recoJet_1 "<<goodJets.at(0)<<std::endl;
     
     if(goodJets.size()>1){
+      //std::cout<<"size goodJets>1 "<<goodJets.size()<<std::endl;
       recoJet_2 = goodJets.at(1);
       recoPt_2  = goodJets.at(1).pt();
       recoEta_2 = goodJets.at(1).eta();
@@ -420,10 +432,17 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
     int i = 0;
     int foundL1Jet_1 = 0;
     int foundL1Jet_2 = 0;
+    bdtDiscriminant = -9.9;
+    //std::cout<<"bdtDiscriminant init "<<bdtDiscriminant<<std::endl;
+
     l1extra::L1JetParticle l1Jet_1;
+    //std::cout<<"extra vector 1 defined "<<l1Jet_1<<std::endl;
     l1extra::L1JetParticle l1Jet_2;
+ //   std::cout<<"l1JetsSorted "<<l1JetsSorted.size()<<std::endl;
     for(auto jet : l1JetsSorted){
-      if(reco::deltaR(jet, recoJet_1)<0.1 && foundL1Jet_1 == 0 ){
+      //std::cout<<"enteredd for loop"<<std::endl;
+      if(reco::deltaR(jet, recoJet_1)<0.4 && foundL1Jet_1 == 0 ){
+        //std::cout<<"entered jet if statement "<<jet<<std::endl;
 	l1Jet_1 = jet;
 	l1Pt_1  = jet.pt();
 	l1Eta_1 = jet.eta();
@@ -431,7 +450,8 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
 	l1NthJet_1 = i;
 	foundL1Jet_1 = 1;
       }
-      if(genPt_2 > 0 && reco::deltaR(jet, recoJet_2)<0.1 && foundL1Jet_2 == 0 ){
+      if(recoPt_2 > 0 && reco::deltaR(jet, recoJet_2)<0.4 && foundL1Jet_2 == 0 ){
+        //std::cout<<"entered second if stment"<<jet<<std::endl;
 	l1Jet_2 = jet;
 	l1Pt_2  = jet.pt();
 	l1Eta_2 = jet.eta();
@@ -443,33 +463,64 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
     }
 
     if(foundL1Jet_1>0 && foundL1Jet_2>0){
+      //std::cout<<"found L1 jets"<<std::endl;
       l1DeltaEta = l1Eta_1 - l1Eta_2;
       l1DeltaPhi = l1Phi_1 - l1Phi_2;
+      l1Pt_1_f = l1Pt_1;
+      l1Pt_2_f = l1Pt_2;
+      l1DeltaEta_f = l1DeltaEta;
+      l1DeltaPhi_f = l1DeltaPhi;
       l1DeltaR = reco::deltaR(l1Jet_1, l1Jet_2);
       l1Mass = (l1Jet_1.p4() + l1Jet_2.p4()).mass();
-    }
-    
+      l1Mass_f = l1Mass;
+      std::vector<float> event;
+
+      event.push_back(l1Pt_1_f);
+      event.push_back(l1Pt_2_f);
+      event.push_back(l1DeltaEta_f);
+      event.push_back(l1DeltaPhi_f);
+      event.push_back(l1Mass_f);
+
+      bdtDiscriminant = reader->EvaluateMVA(event, "BDT classifier");
+      //std::cout<<"bdtDiscriminant: "<<bdtDiscriminant<<std::endl;
+      l1pt_all_1->Fill(l1Pt_1);
+      l1pt_all_2->Fill(l1Pt_2);
+      if(bdtDiscriminant >= -.003){
+	l1pt_tight_1->Fill(l1Pt_1);
+        l1pt_tight_2->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant >= -.183){
+        l1pt_medium_1->Fill(l1Pt_1);
+        l1pt_medium_2->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant >= -.308){
+        l1pt_loose_1->Fill(l1Pt_1);
+        l1pt_loose_2->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant >= -.353){
+        l1pt_veryloose_1->Fill(l1Pt_1);
+        l1pt_veryloose_2->Fill(l1Pt_2);
+      }
+}
+    //std::cout<<"about to assign nRecoJets"<<std::endl;
     nRecoJets = goodJets.size();
+    //std::cout<<"nRecoJets "<<nRecoJets<<std::endl;
     nL1Jets = l1JetsSorted.size();
+    //std::cout<<"nL1Jets: "<<nL1Jets<<std::endl;
 //I guess I should evaluate BDT here? Ok: so should funnel all relevant quantities into vector call "event" and evaluate the BDT on that 
-    float bdtDiscriminant = -9.9;
-    std::vector<float> event;
-
-    event.push_back(l1Pt_1); 
-    event.push_back(l1Pt_2);
-    event.push_back(l1DeltaEta);
-    event.push_back(l1DeltaPhi);
-    event.push_back(l1Mass);
-
-    bdtDiscriminant = reader->EvaluateMVA(event, "BDT classifier");
-    std::cout<<"bdtDiscriminant: "<<bdtDiscriminant<<std::endl;
 //now want to make this go into a branch of the tree
 //ok, now will try to run... but what should I run it on? I suppose just zero bias? I don't have like a full sample of anything...remember to change name of file
 //after that, efficiency plots
+    //nGenJets = genJets->size();
+    //std::cout<<"nGenJets: "<<nGenJets<<std::endl;
+    //nRecoJets = goodJets.size();
+    //std::cout<<"bdtDiscriminant: "<<bdtDiscriminant<<std::endl;
+    //nL1Jets = l1JetsSorted.size();
     efficiencyTree->Fill();
+    //std::cout<<"Filled efficiency tree"<<std::endl;
   }
 // I think I need to put the reader in up here ^^
-  std::cout<<"making regions"<<std::endl;
+ // std::cout<<"making regions"<<std::endl;
   vRegionEt.clear();
   vRegionEta.clear();
   vRegionPhi.clear();
