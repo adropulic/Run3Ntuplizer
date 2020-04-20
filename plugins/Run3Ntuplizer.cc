@@ -43,7 +43,22 @@ Run3Ntuplizer::Run3Ntuplizer( const ParameterSet & cfg ) :
   forwardJets_(consumes<vector <l1extra::L1JetParticle> >(cfg.getParameter<edm::InputTag>("l1UCTForwardJets"))),
   genJets_(consumes<vector <reco::GenJet> >(cfg.getParameter<edm::InputTag>("genJets")))
   {
+    /* Create the Reader object. */
+    reader = new TMVA::Reader("!Color:Silent");
+    //looks like these have to be floats or ints  based on the documentation of AddVariable
+    l1Pt_1_f = 0;
+    l1Pt_2_f = 0;
+    l1DeltaEta_f=0;
+    l1DeltaPhi_f=0;
+    l1Mass_f=0;
 
+    reader->AddVariable("l1Pt_1", &l1Pt_1_f);
+    reader->AddVariable("l1Pt_2", &l1Pt_2_f);
+    reader->AddVariable("l1DeltaEta", &l1DeltaEta_f);
+    reader->AddVariable("l1DeltaPhi", &l1DeltaPhi_f);
+    reader->AddVariable("l1Mass",    &l1Mass_f);
+    std::string CMSSW_BASE(getenv("CMSSW_BASE"));
+    reader->BookMVA( "BDT classifier", "/afs/cern.ch/user/a/addropul/CMSSW_10_6_0_pre4/src/L1Trigger/Run3Ntuplizer/test/June_July_2019/dataset/weights/TMVAClassification_BDT.weights.xml" );
 
     folderName_          = cfg.getUntrackedParameter<std::string>("folderName");
     recoPt_              = cfg.getParameter<double>("recoPtCut");
@@ -195,22 +210,6 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
  {
 //I think I should add the Reader here? Might as well. Before looking through the event
 
-   /* Create the Reader object. */
-   reader = new TMVA::Reader("!Color:Silent");
-   //looks like these have to be floats or ints  based on the documentation of AddVariable
-   l1Pt_1_f = 0;
-   l1Pt_2_f = 0;
-   l1DeltaEta_f=0;
-   l1DeltaPhi_f=0;
-   l1Mass_f=0;
-
-   reader->AddVariable("l1Pt_1", &l1Pt_1_f);
-   reader->AddVariable("l1Pt_2", &l1Pt_2_f);
-   reader->AddVariable("l1DeltaEta", &l1DeltaEta_f);
-   reader->AddVariable("l1DeltaPhi", &l1DeltaPhi_f);
-   reader->AddVariable("l1Mass",    &l1Mass_f);
-   std::string CMSSW_BASE(getenv("CMSSW_BASE"));
-   reader->BookMVA( "BDT classifier", "/afs/cern.ch/user/a/addropul/CMSSW_10_6_0_pre4/src/L1Trigger/Run3Ntuplizer/test/June_July_2019/dataset/weights/TMVAClassification_BDT.weights.xml" );
  //  std::cout<<"Booked MVA method"<<std::endl;
 //Note, can iterate through mulitple methods using code in applyWeightFiles.C
 //want to evaluate BDT using these events, and then book the bdt discriminant in the tree
@@ -337,14 +336,14 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
       int foundRecoJet_1 = 0;
       int foundRecoJet_2 = 0;
       for(auto jet : goodJets){
-	if(reco::deltaR(jet, genJet_1)<0.1 && foundRecoJet_1 == 0 ){
+	if(reco::deltaR(jet, genJet_1)<0.4 && foundRecoJet_1 == 0 ){
 	  recoPt_1  = jet.pt();
 	  recoEta_1 = jet.eta();
 	  recoPhi_1 = jet.phi();
 	  recoNthJet_1 = i;
 	  foundRecoJet_1 = 1;
 	}
-	if(genPt_2 > 0 && reco::deltaR(jet, genJet_2)<0.1 && foundRecoJet_2 == 0 ){
+	if(genPt_2 > 0 && reco::deltaR(jet, genJet_2)<0.4 && foundRecoJet_2 == 0 ){
 	  recoPt_2  = jet.pt();
 	  recoEta_2 = jet.eta();
 	  recoPhi_2 = jet.phi();
@@ -366,14 +365,14 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
       int foundL1Jet_1 = 0;
       int foundL1Jet_2 = 0;
       for(auto jet : l1JetsSorted){
-      if(reco::deltaR(jet, genJet_1)<0.5 && foundL1Jet_1 == 0 ){
+      if(reco::deltaR(jet, genJet_1)<0.4 && foundL1Jet_1 == 0 ){
 	l1Pt_1  = jet.pt();
 	l1Eta_1 = jet.eta();
 	l1Phi_1 = jet.phi();
 	l1NthJet_1 = i;
 	foundL1Jet_1 = 1;
       }
-      if(genPt_2 > 0 && reco::deltaR(jet, genJet_2)<0.5 && foundL1Jet_2 == 0 ){
+      if(genPt_2 > 0 && reco::deltaR(jet, genJet_2)<0.4 && foundL1Jet_2 == 0 ){
 	l1Pt_2  = jet.pt();
 	l1Eta_2 = jet.eta();
 	l1Phi_2 = jet.phi();
@@ -480,9 +479,10 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
       event.push_back(l1DeltaEta_f);
       event.push_back(l1DeltaPhi_f);
       event.push_back(l1Mass_f);
+      //std::cout<<"methodName"<<methodName<<std::endl;
 
-      bdtDiscriminant = reader->EvaluateMVA(event, "BDT classifier");
-      //std::cout<<"bdtDiscriminant: "<<bdtDiscriminant<<std::endl;
+      bdtDiscriminant = reader->EvaluateMVA(event,"BDT classifier");
+      std::cout<<"bdtDiscriminant: "<<bdtDiscriminant<<std::endl;
       l1pt_all_1->Fill(l1Pt_1);
       l1pt_all_2->Fill(l1Pt_2);
       if(bdtDiscriminant >= -.003){
