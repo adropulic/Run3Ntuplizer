@@ -41,7 +41,8 @@ Run3Ntuplizer::Run3Ntuplizer( const ParameterSet & cfg ) :
   regionSource_(consumes<vector <L1CaloRegion> >(cfg.getParameter<edm::InputTag>("UCTRegion"))),
   centralJets_(consumes<vector <l1extra::L1JetParticle> >(cfg.getParameter<edm::InputTag>("l1UCTCentralJets"))),
   forwardJets_(consumes<vector <l1extra::L1JetParticle> >(cfg.getParameter<edm::InputTag>("l1UCTForwardJets"))),
-  genJets_(consumes<vector <reco::GenJet> >(cfg.getParameter<edm::InputTag>("genJets")))
+  genJets_(consumes<vector <reco::GenJet> >(cfg.getParameter<edm::InputTag>("genJets"))),
+  caloJets_(consumes<vector<reco::CaloJet>>(cfg.getParameter<edm::InputTag>("caloJets")))
   {
     /* Create the Reader object. */
     reader = new TMVA::Reader("!Color:Silent");
@@ -177,6 +178,7 @@ void Run3Ntuplizer::createBranches(TTree *tree){
     tree->Branch("nRecoJets",     &nRecoJets,    "nRecoJets/I");
     tree->Branch("nL1Jets",       &nL1Jets,      "nL1Jets/I");
     tree->Branch("bdtDiscriminant", &bdtDiscriminant, "bdtDiscriminant/F");
+    tree->Branch("highest_pt_match",&highest_pt_match,"highest_pt_match/I");
     //std::cout<<"No error making the branches."<<std::endl;
   }
 
@@ -222,7 +224,8 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
    event = evt.id().event();
    Handle<L1CaloRegionCollection> regions;
    
-   std::vector<pat::Jet> goodJets;
+   //std::vector<pat::Jet> goodJets;
+   std::vector<reco::CaloJet> goodJets;
    std::vector<pat::Jet> goodJetsAK8;
   
    edm::Handle < vector<l1extra::L1JetParticle> > l1CentralJets;
@@ -254,27 +257,43 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
   vector<l1extra::L1JetParticle> l1JetsSortedEtaRestricted2p4;
   for( vector<l1extra::L1JetParticle>::const_iterator l1Jet = l1CentralJets->begin(); l1Jet != l1CentralJets->end(); l1Jet++ ){
     l1JetsSorted.push_back(*l1Jet);
-    if(abs(l1Jet->eta()) < 2.4) l1JetsSortedEtaRestricted2p4.push_back(*l1Jet);
+    if(abs(l1Jet->eta()) < 3.2) l1JetsSortedEtaRestricted2p4.push_back(*l1Jet);
   }
 
   for( vector<l1extra::L1JetParticle>::const_iterator l1Jet = l1ForwardJets->begin(); l1Jet != l1ForwardJets->end(); l1Jet++ ){
     l1JetsSorted.push_back(*l1Jet);
-    if(abs(l1Jet->eta()) < 2.4) l1JetsSortedEtaRestricted2p4.push_back(*l1Jet);
+    if(abs(l1Jet->eta()) < 3.2) l1JetsSortedEtaRestricted2p4.push_back(*l1Jet);
   }
 
   std::sort(l1JetsSorted.begin(),l1JetsSorted.end(),compareByPtJets);
   std::sort(l1JetsSortedEtaRestricted2p4.begin(),l1JetsSortedEtaRestricted2p4.end(),compareByPtJets);
-
+  float highest_pt = 0.0;
+  float second_h_pt = 0.0;
+  int num_matches;
+  int num_attempted_matches;
+ // std::cout<<"NEW VECOTR"<<std::endl;
+ // had to change this loop for different eta regions
+  for(unsigned int i=0; i < l1JetsSorted.size(); i++){
+      //std::cout << l1JetsSortedEtaRestricted2p4.at(i).pt()*1.2 <<std::endl;
+      if(i==0){highest_pt = float(l1JetsSorted.at(i).pt()*1.2);}
+      if(i==1){second_h_pt = float(l1JetsSorted.at(i).pt()*1.2);}
+      }
+ // std::cout<<"highest_pt "<<highest_pt<<std::endl;
+ // std::cout<<"second_h_pt "<<second_h_pt<<std::endl;
   ESHandle<L1CaloHcalScale> hcalScale;
   es.get<L1CaloHcalScaleRcd>().get(hcalScale);
 
-  Handle<vector<pat::Jet> > jets;
-  if(evt.getByToken(jetSrc_, jets)){//Begin Getting Reco Taus
-    for (const pat::Jet &jet : *jets) {
+  //Handle<vector<pat::Jet> > jets;
+  Handle<vector<reco::CaloJet>> jets;
+  //if(evt.getByToken(jetSrc_, jets)){//Begin Getting Reco Taus
+  if(evt.getByToken(caloJets_, jets)){
+    //for (const pat::Jet &jet : *jets) {
+    for (const reco::CaloJet &jet : *jets) {
       recoJet_pt->Fill( jet.pt() );
       recoJet_eta->Fill( jet.eta() );
       recoJet_phi->Fill( jet.phi() );
       //get rid of the low pt stuff for analysis to save disk space
+      //std::cout<<"recoPt_ "<< recoPt_ <<std::endl;
       if(jet.pt() > recoPt_ ) {
 	goodJets.push_back(jet);
 
@@ -366,14 +385,14 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
       int foundL1Jet_2 = 0;
       for(auto jet : l1JetsSorted){
       if(reco::deltaR(jet, genJet_1)<0.4 && foundL1Jet_1 == 0 ){
-	l1Pt_1  = jet.pt();
+	l1Pt_1  = jet.pt()*1.2;
 	l1Eta_1 = jet.eta();
 	l1Phi_1 = jet.phi();
 	l1NthJet_1 = i;
 	foundL1Jet_1 = 1;
       }
       if(genPt_2 > 0 && reco::deltaR(jet, genJet_2)<0.4 && foundL1Jet_2 == 0 ){
-	l1Pt_2  = jet.pt();
+	l1Pt_2  = jet.pt()*1.2;
 	l1Eta_2 = jet.eta();
 	l1Phi_2 = jet.phi();
 	l1NthJet_2 = i;
@@ -404,6 +423,7 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
   //delta phi between two jets
   //invariant mass of two jets
   //total number of jets in the event
+
   pat::Jet recoJet_1;
   pat::Jet recoJet_2;
   if(goodJets.size()>0){
@@ -443,16 +463,33 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
       if(reco::deltaR(jet, recoJet_1)<0.4 && foundL1Jet_1 == 0 ){
         //std::cout<<"entered jet if statement "<<jet<<std::endl;
 	l1Jet_1 = jet;
-	l1Pt_1  = jet.pt();
+	l1Pt_1  = jet.pt()*1.2;
+        //if(l1Pt_1 == highest_pt){std::cout<<"Highest Pt Match "<<std::endl;}
+        //if(l1Pt_1 != highest_pt){std::cout<<"Highest Pt NO Match "<<std::endl;}
+	//std::cout<<"l1Pt_1 "<<l1Pt_1<<std::endl;
 	l1Eta_1 = jet.eta();
 	l1Phi_1 = jet.phi();
 	l1NthJet_1 = i;
 	foundL1Jet_1 = 1;
+        l1pt_all_1->Fill(l1Pt_1);
       }
-      if(recoPt_2 > 0 && reco::deltaR(jet, recoJet_2)<0.4 && foundL1Jet_2 == 0 ){
+      if(recoPt_2 > 0 && reco::deltaR(jet, recoJet_2)<0.4 && foundL1Jet_2 == 0 && foundL1Jet_1 ==1 ){
         //std::cout<<"entered second if stment"<<jet<<std::endl;
 	l1Jet_2 = jet;
-	l1Pt_2  = jet.pt();
+	l1Pt_2  = jet.pt()*1.2;
+        l1pt_all_2->Fill(l1Pt_2);
+	//std::cout<<highest_pt<<" highest_pt"<<std::endl;
+	//std::cout<<second_h_pt<<" second_h_pt"<<std::endl;
+        if((float(l1Pt_1) == highest_pt)&&(float(l1Pt_2) == second_h_pt)){	
+		highest_pt_match=1;
+		//std::cout<<"highest_pt_match=1"<<std::endl;
+			}
+	else if ((float(l1Pt_1) != highest_pt)||(float(l1Pt_2) != second_h_pt)){
+		//std::cout<<"highest_pt no match"<<std::endl; 
+		highest_pt_match=0;}
+        //if(l1Pt_2 != second_h_pt){std::cout<<"2 highest Pt NO Match "<<std::endl;}
+	//std::cout<<"l1Pt_2 "<<l1Pt_2<<std::endl;
+	//std::cout<<"num matches ratio "<<num_matches/num_attempted_matches<<std::endl;
 	l1Eta_2 = jet.eta();
 	l1Phi_2 = jet.phi();
 	l1NthJet_2 = i;
@@ -466,12 +503,18 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
       l1DeltaEta = l1Eta_1 - l1Eta_2;
       l1DeltaPhi = l1Phi_1 - l1Phi_2;
       l1Pt_1_f = l1Pt_1;
+      //std::cout<<"l1Pt_1_f "<<l1Pt_1_f<<std::endl;
       l1Pt_2_f = l1Pt_2;
+      //std::cout<<"l1Pt_2_f "<<l1Pt_2_f<<std::endl;
       l1DeltaEta_f = l1DeltaEta;
       l1DeltaPhi_f = l1DeltaPhi;
       l1DeltaR = reco::deltaR(l1Jet_1, l1Jet_2);
       l1Mass = (l1Jet_1.p4() + l1Jet_2.p4()).mass();
+     // std::cout<<"l1Jet_1.p4() "<<l1Jet_1.p4()<<std::endl;
+     // std::cout<<"l1Jet_1.pt()*1.2 "<<l1Jet_1.pt()*1.2<<std::endl;
+     // std::cout<<"l1Jet_2.p4() "<<l1Jet_2.p4()<<std::endl;
       l1Mass_f = l1Mass;
+      //std::cout<<"l1Mass "<<l1Mass<<std::endl;
       std::vector<float> event;
 
       event.push_back(l1Pt_1_f);
@@ -483,23 +526,29 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
 
       bdtDiscriminant = reader->EvaluateMVA(event,"BDT classifier");
       std::cout<<"bdtDiscriminant: "<<bdtDiscriminant<<std::endl;
-      l1pt_all_1->Fill(l1Pt_1);
-      l1pt_all_2->Fill(l1Pt_2);
-      if(bdtDiscriminant >= -.003){
+      if(bdtDiscriminant >= .100){
 	l1pt_tight_1->Fill(l1Pt_1);
         l1pt_tight_2->Fill(l1Pt_2);
+        //std::cout<<"bdt>-.003 l1pt_tight_1 "<<l1pt_tight_1<<std::endl;
+        //std::cout<<"bdt>-.003 l1pt_tight_2 "<<l1pt_tight_2<<std::endl;
       }
-      if(bdtDiscriminant >= -.183){
+      if(bdtDiscriminant >= -.003){
         l1pt_medium_1->Fill(l1Pt_1);
         l1pt_medium_2->Fill(l1Pt_2);
+        //std::cout<<"bdt>-.183 l1pt_medium_1 "<<l1pt_medium_1<<std::endl;
+        //std::cout<<"bdt>-.183 l1pt_medium_2 "<<l1pt_medium_2<<std::endl;
       }
-      if(bdtDiscriminant >= -.308){
+      if(bdtDiscriminant >= -.027){
         l1pt_loose_1->Fill(l1Pt_1);
         l1pt_loose_2->Fill(l1Pt_2);
+        //std::cout<<"bdt>-.308 l1pt_loose_1 "<<l1pt_loose_1<<std::endl;
+        //std::cout<<"bdt>-.308 l1pt_loose_2 "<<l1pt_loose_2<<std::endl;
       }
-      if(bdtDiscriminant >= -.353){
+      if(bdtDiscriminant >= -.100){
         l1pt_veryloose_1->Fill(l1Pt_1);
         l1pt_veryloose_2->Fill(l1Pt_2);
+        //std::cout<<"bdt>-.353 l1pt_veryloose_1 "<<l1pt_veryloose_1<<std::endl;
+        //std::cout<<"bdt>-.353 l1pt_veryloose_2 "<<l1pt_veryloose_2<<std::endl;
       }
 }
     //std::cout<<"about to assign nRecoJets"<<std::endl;
