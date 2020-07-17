@@ -464,32 +464,23 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
     l1extra::L1JetParticle l1Jet_2;
  //   std::cout<<"l1JetsSorted "<<l1JetsSorted.size()<<std::endl;
     for(auto jet : l1JetsSorted){
-      //std::cout<<"enteredd for loop"<<std::endl;
-      if(reco::deltaR(jet, recoJet_1)<0.4 && foundL1Jet_1 == 0 ){
-      //if( foundL1Jet_1 == 0 ){
-        //std::cout<<"entered jet if statement "<<jet<<std::endl;
+      //if(reco::deltaR(jet, recoJet_1)<0.4 && foundL1Jet_1 == 0 ){
+      if( foundL1Jet_1 == 0 ){
 	l1Jet_1 = jet;
 	l1Pt_1  = jet.pt()*1.2;
-        //if(l1Pt_1 == highest_pt){std::cout<<"Highest Pt Match "<<std::endl;}
-        //if(l1Pt_1 != highest_pt){std::cout<<"Highest Pt NO Match "<<std::endl;}
-	//std::cout<<"l1Pt_1 "<<l1Pt_1<<std::endl;
 	l1Eta_1 = jet.eta();
 	l1Phi_1 = jet.phi();
 	l1NthJet_1 = i;
 	foundL1Jet_1 = 1;
-       // l1pt_all_1->Fill(l1Pt_1);
       }
-      if(recoPt_2 > 0 && reco::deltaR(jet, recoJet_2)<0.4 && foundL1Jet_2 == 0 && foundL1Jet_1 ==1 ){
-      //if( foundL1Jet_2 == 0 && foundL1Jet_1 ==1 ){
-        //std::cout<<"entered second if stment"<<jet<<std::endl;
+      //if(recoPt_2 > 0 && reco::deltaR(jet, recoJet_2)<0.4 && foundL1Jet_2 == 0 && foundL1Jet_1 ==1 ){
+      if( foundL1Jet_2 == 0 && foundL1Jet_1 ==1 ){
 	l1Jet_2 = jet;
 	l1Pt_2  = jet.pt()*1.2;
         if((float(l1Pt_1) == highest_pt)&&(float(l1Pt_2) == second_h_pt)){	
 		highest_pt_match=1;
-		//std::cout<<"highest_pt_match=1"<<std::endl;
 			}
 	else if ((float(l1Pt_1) != highest_pt)||(float(l1Pt_2) != second_h_pt)){
-		//std::cout<<"highest_pt no match"<<std::endl; 
 		highest_pt_match=0;}
 	l1Eta_2 = jet.eta();
 	l1Phi_2 = jet.phi();
