@@ -210,7 +210,6 @@ void Run3Ntuplizer::beginJob( const EventSetup & es) {
 
 void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
  {
-//I think I should add the Reader here? Might as well. Before looking through the event
 
  //  std::cout<<"Booked MVA method"<<std::endl;
 //Note, can iterate through mulitple methods using code in applyWeightFiles.C
@@ -275,8 +274,14 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
  // had to change this loop for different eta regions
   for(unsigned int i=0; i < l1JetsSorted.size(); i++){
       //std::cout << l1JetsSortedEtaRestricted2p4.at(i).pt()*1.2 <<std::endl;
-      if(i==0){highest_pt = float(l1JetsSorted.at(i).pt()*1.2);}
-      if(i==1){second_h_pt = float(l1JetsSorted.at(i).pt()*1.2);}
+      if(i==0){
+		highest_pt = float(l1JetsSorted.at(i).pt()*1.2);
+		l1pt_all_1->Fill(highest_pt);
+	}
+      if(i==1){
+		second_h_pt = float(l1JetsSorted.at(i).pt()*1.2);
+		l1pt_all_2->Fill(second_h_pt);
+	}
       }
  // std::cout<<"highest_pt "<<highest_pt<<std::endl;
  // std::cout<<"second_h_pt "<<second_h_pt<<std::endl;
@@ -461,6 +466,7 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
     for(auto jet : l1JetsSorted){
       //std::cout<<"enteredd for loop"<<std::endl;
       if(reco::deltaR(jet, recoJet_1)<0.4 && foundL1Jet_1 == 0 ){
+      //if( foundL1Jet_1 == 0 ){
         //std::cout<<"entered jet if statement "<<jet<<std::endl;
 	l1Jet_1 = jet;
 	l1Pt_1  = jet.pt()*1.2;
@@ -471,15 +477,13 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
 	l1Phi_1 = jet.phi();
 	l1NthJet_1 = i;
 	foundL1Jet_1 = 1;
-        l1pt_all_1->Fill(l1Pt_1);
+       // l1pt_all_1->Fill(l1Pt_1);
       }
       if(recoPt_2 > 0 && reco::deltaR(jet, recoJet_2)<0.4 && foundL1Jet_2 == 0 && foundL1Jet_1 ==1 ){
+      //if( foundL1Jet_2 == 0 && foundL1Jet_1 ==1 ){
         //std::cout<<"entered second if stment"<<jet<<std::endl;
 	l1Jet_2 = jet;
 	l1Pt_2  = jet.pt()*1.2;
-        l1pt_all_2->Fill(l1Pt_2);
-	//std::cout<<highest_pt<<" highest_pt"<<std::endl;
-	//std::cout<<second_h_pt<<" second_h_pt"<<std::endl;
         if((float(l1Pt_1) == highest_pt)&&(float(l1Pt_2) == second_h_pt)){	
 		highest_pt_match=1;
 		//std::cout<<"highest_pt_match=1"<<std::endl;
@@ -487,9 +491,6 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
 	else if ((float(l1Pt_1) != highest_pt)||(float(l1Pt_2) != second_h_pt)){
 		//std::cout<<"highest_pt no match"<<std::endl; 
 		highest_pt_match=0;}
-        //if(l1Pt_2 != second_h_pt){std::cout<<"2 highest Pt NO Match "<<std::endl;}
-	//std::cout<<"l1Pt_2 "<<l1Pt_2<<std::endl;
-	//std::cout<<"num matches ratio "<<num_matches/num_attempted_matches<<std::endl;
 	l1Eta_2 = jet.eta();
 	l1Phi_2 = jet.phi();
 	l1NthJet_2 = i;
@@ -499,22 +500,15 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
     }
 
     if(foundL1Jet_1>0 && foundL1Jet_2>0){
-      //std::cout<<"found L1 jets"<<std::endl;
       l1DeltaEta = l1Eta_1 - l1Eta_2;
       l1DeltaPhi = l1Phi_1 - l1Phi_2;
       l1Pt_1_f = l1Pt_1;
-      //std::cout<<"l1Pt_1_f "<<l1Pt_1_f<<std::endl;
       l1Pt_2_f = l1Pt_2;
-      //std::cout<<"l1Pt_2_f "<<l1Pt_2_f<<std::endl;
       l1DeltaEta_f = l1DeltaEta;
       l1DeltaPhi_f = l1DeltaPhi;
       l1DeltaR = reco::deltaR(l1Jet_1, l1Jet_2);
       l1Mass = (l1Jet_1.p4() + l1Jet_2.p4()).mass();
-     // std::cout<<"l1Jet_1.p4() "<<l1Jet_1.p4()<<std::endl;
-     // std::cout<<"l1Jet_1.pt()*1.2 "<<l1Jet_1.pt()*1.2<<std::endl;
-     // std::cout<<"l1Jet_2.p4() "<<l1Jet_2.p4()<<std::endl;
       l1Mass_f = l1Mass;
-      //std::cout<<"l1Mass "<<l1Mass<<std::endl;
       std::vector<float> event;
 
       event.push_back(l1Pt_1_f);
@@ -522,7 +516,6 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
       event.push_back(l1DeltaEta_f);
       event.push_back(l1DeltaPhi_f);
       event.push_back(l1Mass_f);
-      //std::cout<<"methodName"<<methodName<<std::endl;
 
       bdtDiscriminant = reader->EvaluateMVA(event,"BDT classifier");
       std::cout<<"bdtDiscriminant: "<<bdtDiscriminant<<std::endl;
@@ -556,10 +549,6 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
     //std::cout<<"nRecoJets "<<nRecoJets<<std::endl;
     nL1Jets = l1JetsSorted.size();
     //std::cout<<"nL1Jets: "<<nL1Jets<<std::endl;
-//I guess I should evaluate BDT here? Ok: so should funnel all relevant quantities into vector call "event" and evaluate the BDT on that 
-//now want to make this go into a branch of the tree
-//ok, now will try to run... but what should I run it on? I suppose just zero bias? I don't have like a full sample of anything...remember to change name of file
-//after that, efficiency plots
     //nGenJets = genJets->size();
     //std::cout<<"nGenJets: "<<nGenJets<<std::endl;
     //nRecoJets = goodJets.size();
@@ -568,7 +557,6 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
     efficiencyTree->Fill();
     //std::cout<<"Filled efficiency tree"<<std::endl;
   }
-// I think I need to put the reader in up here ^^
  // std::cout<<"making regions"<<std::endl;
   vRegionEt.clear();
   vRegionEta.clear();
