@@ -127,6 +127,52 @@ class Run3Ntuplizer : public edm::EDAnalyzer {
   TH1F* l1pt_veryloose_1;
   TH1F* l1pt_veryloose_2;
 
+  TH1F* l1pt_all_1_25;
+  TH1F* l1pt_all_2_25;
+  TH1F* l1pt_tight_1_25;
+  TH1F* l1pt_tight_2_25;
+  TH1F* l1pt_medium_1_25;
+  TH1F* l1pt_medium_2_25;
+  TH1F* l1pt_loose_1_25;
+  TH1F* l1pt_loose_2_25;
+  TH1F* l1pt_veryloose_1_25;
+  TH1F* l1pt_veryloose_2_25;
+
+  TH1F* l1pt_all_1_10;
+  TH1F* l1pt_all_2_10;
+  TH1F* l1pt_tight_1_10;
+  TH1F* l1pt_tight_2_10;
+  TH1F* l1pt_medium_1_10;
+  TH1F* l1pt_medium_2_10;
+  TH1F* l1pt_loose_1_10;
+  TH1F* l1pt_loose_2_10;
+  TH1F* l1pt_veryloose_1_10;
+  TH1F* l1pt_veryloose_2_10;
+
+  TH1F* l1pt_all_1_5;
+  TH1F* l1pt_all_2_5;
+  TH1F* l1pt_tight_1_5;
+  TH1F* l1pt_tight_2_5;
+  TH1F* l1pt_medium_1_5;
+  TH1F* l1pt_medium_2_5;
+  TH1F* l1pt_loose_1_5;
+  TH1F* l1pt_loose_2_5;
+  TH1F* l1pt_veryloose_1_5;
+  TH1F* l1pt_veryloose_2_5;
+
+  TH1F* l1pt_all_1_2;
+  TH1F* l1pt_all_2_2;
+  TH1F* l1pt_tight_1_2;
+  TH1F* l1pt_tight_2_2;
+  TH1F* l1pt_medium_1_2;
+  TH1F* l1pt_medium_2_2;
+  TH1F* l1pt_loose_1_2;
+  TH1F* l1pt_loose_2_2;
+  TH1F* l1pt_veryloose_1_2;
+  TH1F* l1pt_veryloose_2_2;
+
+
+
   TTree* genTree;
   TTree* efficiencyTree;
   TTree* efficiencyTreeAK8;
@@ -174,6 +220,7 @@ class Run3Ntuplizer : public edm::EDAnalyzer {
   edm::EDGetTokenT<vector <l1extra::L1JetParticle> > centralJets_;
   edm::EDGetTokenT<vector <l1extra::L1JetParticle> > forwardJets_;
   edm::EDGetTokenT<vector <reco::GenJet> > genJets_;
+  edm::EDGetTokenT<vector<reco::CaloJet>> caloJets_;
 
   /* Create the Reader object. */
   TMVA::Reader *reader;
@@ -186,7 +233,7 @@ class Run3Ntuplizer : public edm::EDAnalyzer {
   //TMVA::Reader *reader = new TMVA::Reader("!Color:Silent");
 
   std::string folderName_;
-
+  
   double jetPt, jetEta, jetPhi;
   double recoPt, recoEta, recoPhi;
   double jetPtAK8, jetEtaAK8, jetPhiAK8;
@@ -215,7 +262,8 @@ class Run3Ntuplizer : public edm::EDAnalyzer {
   double recoPt_;
   bool isData_;
   int l1MatchedAK8;
-  float bdtDiscriminant;
+  float bdtDiscriminant, bdtDiscriminant_25, bdtDiscriminant_10, bdtDiscriminant_5, bdtDiscriminant_2;
+  int highest_pt_match;
 
 
 	 
