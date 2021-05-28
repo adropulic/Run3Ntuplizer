@@ -59,8 +59,11 @@ Run3Ntuplizer::Run3Ntuplizer( const ParameterSet & cfg ) :
     reader->AddVariable("l1DeltaPhi", &l1DeltaPhi_f);
     reader->AddVariable("l1Mass",    &l1Mass_f);
     std::string CMSSW_BASE(getenv("CMSSW_BASE"));
-    reader->BookMVA( "BDT classifier", "/afs/cern.ch/user/a/addropul/CMSSW_10_6_0_pre4/src/L1Trigger/Run3Ntuplizer/test/June_July_2019/dataset/weights/TMVAClassification_BDT.weights.xml" );
-
+    reader->BookMVA( "BDT classifier", "/afs/cern.ch/user/a/addropul/CMSSW_10_6_0_pre4/src/L1Trigger/Run3Ntuplizer/test/June_July_2019/dataset/weights/TMVAClassification_BDT_50.weights.xml" );
+    reader->BookMVA( "BDT 25 classifier", "/afs/cern.ch/user/a/addropul/CMSSW_10_6_0_pre4/src/L1Trigger/Run3Ntuplizer/test/June_July_2019/dataset/weights/TMVAClassification_BDT_25.weights.xml" );
+    reader->BookMVA( "BDT 10 classifier", "/afs/cern.ch/user/a/addropul/CMSSW_10_6_0_pre4/src/L1Trigger/Run3Ntuplizer/test/June_July_2019/dataset/weights/TMVAClassification_BDT_10.weights.xml" );
+    reader->BookMVA( "BDT 5 classifier", "/afs/cern.ch/user/a/addropul/CMSSW_10_6_0_pre4/src/L1Trigger/Run3Ntuplizer/test/June_July_2019/dataset/weights/TMVAClassification_BDT_4.weights.xml" );
+    reader->BookMVA( "BDT 2 classifier", "/afs/cern.ch/user/a/addropul/CMSSW_10_6_0_pre4/src/L1Trigger/Run3Ntuplizer/test/June_July_2019/dataset/weights/TMVAClassification_BDT_2.weights.xml" );
     folderName_          = cfg.getUntrackedParameter<std::string>("folderName");
     recoPt_              = cfg.getParameter<double>("recoPtCut");
     isData_              = cfg.getParameter<bool>("isData");
@@ -109,6 +112,55 @@ Run3Ntuplizer::Run3Ntuplizer( const ParameterSet & cfg ) :
     l1pt_loose_2   = folder.make<TH1F>( "l1pt_loose_2" , "p_{t}", 300,  0., 300. );
     l1pt_veryloose_2   = folder.make<TH1F>( "l1pt_veryloose_2" , "p_{t}", 300,  0., 300. );
     l1pt_all_2   = folder.make<TH1F>( "l1pt_all_2" , "p_{t}", 300,  0., 300. );
+
+    l1pt_tight_1_25   = folder.make<TH1F>( "l1pt_tight_1_25" , "p_{t}", 300,  0., 300. );
+    l1pt_medium_1_25   = folder.make<TH1F>( "l1pt_medium_1_25" , "p_{t}", 300,  0., 300. );
+    l1pt_loose_1_25   = folder.make<TH1F>( "l1pt_loose_1_25" , "p_{t}", 300,  0., 300. );
+    l1pt_veryloose_1_25   = folder.make<TH1F>( "l1pt_veryloose_1_25" , "p_{t}", 300,  0., 300. );
+    l1pt_all_1_25   = folder.make<TH1F>( "l1pt_all_1_25" , "p_{t}", 300,  0., 300. );
+
+    l1pt_tight_2_25   = folder.make<TH1F>( "l1pt_tight_2_25" , "p_{t}", 300,  0., 300. );
+    l1pt_medium_2_25   = folder.make<TH1F>( "l1pt_medium_2_25" , "p_{t}", 300,  0., 300. );
+    l1pt_loose_2_25   = folder.make<TH1F>( "l1pt_loose_2_25" , "p_{t}", 300,  0., 300. );
+    l1pt_veryloose_2_25   = folder.make<TH1F>( "l1pt_veryloose_2_25" , "p_{t}", 300,  0., 300. );
+    l1pt_all_2_25   = folder.make<TH1F>( "l1pt_all_2_25" , "p_{t}", 300,  0., 300. );
+
+    l1pt_tight_1_10   = folder.make<TH1F>( "l1pt_tight_1_10" , "p_{t}", 300,  0., 300. );
+    l1pt_medium_1_10   = folder.make<TH1F>( "l1pt_medium_1_10" , "p_{t}", 300,  0., 300. );
+    l1pt_loose_1_10   = folder.make<TH1F>( "l1pt_loose_1_10" , "p_{t}", 300,  0., 300. );
+    l1pt_veryloose_1_10   = folder.make<TH1F>( "l1pt_veryloose_1_10" , "p_{t}", 300,  0., 300. );
+    l1pt_all_1_10   = folder.make<TH1F>( "l1pt_all_1_10" , "p_{t}", 300,  0., 300. );
+
+    l1pt_tight_2_10   = folder.make<TH1F>( "l1pt_tight_2_10" , "p_{t}", 300,  0., 300. );
+    l1pt_medium_2_10   = folder.make<TH1F>( "l1pt_medium_2_10" , "p_{t}", 300,  0., 300. );
+    l1pt_loose_2_10   = folder.make<TH1F>( "l1pt_loose_2_10" , "p_{t}", 300,  0., 300. );
+    l1pt_veryloose_2_10   = folder.make<TH1F>( "l1pt_veryloose_2_10" , "p_{t}", 300,  0., 300. );
+    l1pt_all_2_10   = folder.make<TH1F>( "l1pt_all_2_10" , "p_{t}", 300,  0., 300. );
+
+    l1pt_tight_1_5   = folder.make<TH1F>( "l1pt_tight_1_5" , "p_{t}", 300,  0., 300. );
+    l1pt_medium_1_5   = folder.make<TH1F>( "l1pt_medium_1_5" , "p_{t}", 300,  0., 300. );
+    l1pt_loose_1_5   = folder.make<TH1F>( "l1pt_loose_1_5" , "p_{t}", 300,  0., 300. );
+    l1pt_veryloose_1_5   = folder.make<TH1F>( "l1pt_veryloose_1_5" , "p_{t}", 300,  0., 300. );
+    l1pt_all_1_5   = folder.make<TH1F>( "l1pt_all_1_5" , "p_{t}", 300,  0., 300. );
+
+    l1pt_tight_2_5   = folder.make<TH1F>( "l1pt_tight_2_5" , "p_{t}", 300,  0., 300. );
+    l1pt_medium_2_5   = folder.make<TH1F>( "l1pt_medium_2_5" , "p_{t}", 300,  0., 300. );
+    l1pt_loose_2_5   = folder.make<TH1F>( "l1pt_loose_2_5" , "p_{t}", 300,  0., 300. );
+    l1pt_veryloose_2_5   = folder.make<TH1F>( "l1pt_veryloose_2_5" , "p_{t}", 300,  0., 300. );
+    l1pt_all_2_5   = folder.make<TH1F>( "l1pt_all_2_5" , "p_{t}", 300,  0., 300. );
+
+    l1pt_tight_1_2   = folder.make<TH1F>( "l1pt_tight_1_2" , "p_{t}", 300,  0., 300. );
+    l1pt_medium_1_2   = folder.make<TH1F>( "l1pt_medium_1_2" , "p_{t}", 300,  0., 300. );
+    l1pt_loose_1_2   = folder.make<TH1F>( "l1pt_loose_1_2" , "p_{t}", 300,  0., 300. );
+    l1pt_veryloose_1_2   = folder.make<TH1F>( "l1pt_veryloose_1_2" , "p_{t}", 300,  0., 300. );
+    l1pt_all_1_2   = folder.make<TH1F>( "l1pt_all_1_2" , "p_{t}", 300,  0., 300. );
+
+    l1pt_tight_2_2   = folder.make<TH1F>( "l1pt_tight_2_2" , "p_{t}", 300,  0., 300. );
+    l1pt_medium_2_2   = folder.make<TH1F>( "l1pt_medium_2_2" , "p_{t}", 300,  0., 300. );
+    l1pt_loose_2_2   = folder.make<TH1F>( "l1pt_loose_2_2" , "p_{t}", 300,  0., 300. );
+    l1pt_veryloose_2_2   = folder.make<TH1F>( "l1pt_veryloose_2_2" , "p_{t}", 300,  0., 300. );
+    l1pt_all_2_2   = folder.make<TH1F>( "l1pt_all_2_2" , "p_{t}", 300,  0., 300. );
+
 
     efficiencyTreeAK8 = folder.make<TTree>("EfficiencyTreeAK8", "Efficiency Tree AK8");
     efficiencyTreeAK8->Branch("run",    &run,     "run/I");
@@ -178,6 +230,10 @@ void Run3Ntuplizer::createBranches(TTree *tree){
     tree->Branch("nRecoJets",     &nRecoJets,    "nRecoJets/I");
     tree->Branch("nL1Jets",       &nL1Jets,      "nL1Jets/I");
     tree->Branch("bdtDiscriminant", &bdtDiscriminant, "bdtDiscriminant/F");
+    tree->Branch("bdtDiscriminant_25", &bdtDiscriminant_25, "bdtDiscriminant_25/F");
+    tree->Branch("bdtDiscriminant_10", &bdtDiscriminant_10, "bdtDiscriminant_10/F");
+    tree->Branch("bdtDiscriminant_5", &bdtDiscriminant_5, "bdtDiscriminant_5/F");
+    tree->Branch("bdtDiscriminant_2", &bdtDiscriminant_2, "bdtDiscriminant_2/F");
     tree->Branch("highest_pt_match",&highest_pt_match,"highest_pt_match/I");
     //std::cout<<"No error making the branches."<<std::endl;
   }
@@ -276,10 +332,11 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
       //std::cout << l1JetsSortedEtaRestricted2p4.at(i).pt()*1.2 <<std::endl;
       if(i==0){
 		highest_pt = float(l1JetsSorted.at(i).pt()*1.2);
-		l1pt_all_1->Fill(highest_pt);
+		//l1pt_all_1->Fill(highest_pt);
 	}
       if(i==1){
 		second_h_pt = float(l1JetsSorted.at(i).pt()*1.2);
+		l1pt_all_1->Fill(highest_pt); //ASD 05-01-21 this must be filled here to get proper rates plots 
 		l1pt_all_2->Fill(second_h_pt);
 	}
       }
@@ -462,35 +519,64 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
     l1extra::L1JetParticle l1Jet_1;
     //std::cout<<"extra vector 1 defined "<<l1Jet_1<<std::endl;
     l1extra::L1JetParticle l1Jet_2;
- //   std::cout<<"l1JetsSorted "<<l1JetsSorted.size()<<std::endl;
-    for(auto jet : l1JetsSorted){
-      //if(reco::deltaR(jet, recoJet_1)<0.4 && foundL1Jet_1 == 0 ){
-      if( foundL1Jet_1 == 0 ){
-	l1Jet_1 = jet;
-	l1Pt_1  = jet.pt()*1.2;
-	l1Eta_1 = jet.eta();
-	l1Phi_1 = jet.phi();
+
+
+    if(l1JetsSorted.size() > 0){
+    	l1Jet_1 = l1JetsSorted.at(0);
+	l1Pt_1 = l1JetsSorted.at(0).pt()*1.2;
+	l1Eta_1 = l1JetsSorted.at(0).eta();
+	l1Phi_1 = l1JetsSorted.at(0).phi();
 	l1NthJet_1 = i;
 	foundL1Jet_1 = 1;
-      }
-      //if(recoPt_2 > 0 && reco::deltaR(jet, recoJet_2)<0.4 && foundL1Jet_2 == 0 && foundL1Jet_1 ==1 ){
-      if( foundL1Jet_2 == 0 && foundL1Jet_1 ==1 ){
-	l1Jet_2 = jet;
-	l1Pt_2  = jet.pt()*1.2;
-        if((float(l1Pt_1) == highest_pt)&&(float(l1Pt_2) == second_h_pt)){	
-		highest_pt_match=1;
-			}
-	else if ((float(l1Pt_1) != highest_pt)||(float(l1Pt_2) != second_h_pt)){
-		highest_pt_match=0;}
-	l1Eta_2 = jet.eta();
-	l1Phi_2 = jet.phi();
-	l1NthJet_2 = i;
-	foundL1Jet_2 = 1;
-      }
-      i++;
     }
+    if(l1JetsSorted.size() > 1){
+	l1Jet_2 = l1JetsSorted.at(1);
+	l1Pt_2 = l1JetsSorted.at(1).pt()*1.2;
+	if((float(l1Pt_1) == highest_pt)&&(float(l1Pt_2) == second_h_pt)){
+		 highest_pt_match = 1;
+        }
+        else if ((float(l1Pt_1) != highest_pt)||(float(l1Pt_2) != second_h_pt)){
+		highest_pt_match = 0;
+	}
+	l1Eta_2 = l1JetsSorted.at(1).eta();
+	l1Phi_2 = l1JetsSorted.at(1).phi();
+	l1NthJet_2 = i;
+	foundL1Jet_2 = 1;	
+	
+    }
+ // RECO-MATCHING CODE BELOW
+ //   std::cout<<"l1JetsSorted "<<l1JetsSorted.size()<<std::endl;
+  //  for(auto jet : l1JetsSorted){
+  //    //if(reco::deltaR(jet, recoJet_1)<0.4 && foundL1Jet_1 == 0 ){
+  //    if( foundL1Jet_1 == 0 ){
+  //      l1Jet_1 = jet;
+  //      l1Pt_1  = jet.pt()*1.2;
+  //      l1Eta_1 = jet.eta();
+  //      l1Phi_1 = jet.phi();
+  //      l1NthJet_1 = i;
+  //      foundL1Jet_1 = 1;
+  //      //std::cout<<"found L1 jet 1"<<std::endl;
+  //    }
+  //    //if(recoPt_2 > 0 && reco::deltaR(jet, recoJet_2)<0.4 && foundL1Jet_2 == 0 && foundL1Jet_1 ==1 ){
+  //    if( foundL1Jet_2 == 0 && foundL1Jet_1 ==1 ){
+  //      l1Jet_2 = jet;
+  //      l1Pt_2  = jet.pt()*1.2;
+  //      if((float(l1Pt_1) == highest_pt)&&(float(l1Pt_2) == second_h_pt)){	
+  //      	highest_pt_match=1;
+  //      		}
+  //      else if ((float(l1Pt_1) != highest_pt)||(float(l1Pt_2) != second_h_pt)){
+  //      	highest_pt_match=0;}
+  //      l1Eta_2 = jet.eta();
+  //      l1Phi_2 = jet.phi();
+  //      l1NthJet_2 = i;
+  //      foundL1Jet_2 = 1;
+  //      //std::cout<<"found L1 jet 2"<<std::endl;
+  //    }
+  //    i++;
+  //  }
 
     if(foundL1Jet_1>0 && foundL1Jet_2>0){
+      //std::cout<<"entered 2 jet conditional"<<std::endl;
       l1DeltaEta = l1Eta_1 - l1Eta_2;
       l1DeltaPhi = l1Phi_1 - l1Phi_2;
       l1Pt_1_f = l1Pt_1;
@@ -509,28 +595,97 @@ void Run3Ntuplizer::analyze( const Event& evt, const EventSetup& es )
       event.push_back(l1Mass_f);
 
       bdtDiscriminant = reader->EvaluateMVA(event,"BDT classifier");
+      bdtDiscriminant_25 = reader->EvaluateMVA(event,"BDT 25 classifier");
+      bdtDiscriminant_10 = reader->EvaluateMVA(event,"BDT 10 classifier");
+      bdtDiscriminant_5 = reader->EvaluateMVA(event,"BDT 5 classifier");
+      bdtDiscriminant_2 = reader->EvaluateMVA(event,"BDT 2 classifier");
       std::cout<<"bdtDiscriminant: "<<bdtDiscriminant<<std::endl;
       if(bdtDiscriminant >= .100){
 	l1pt_tight_1->Fill(l1Pt_1);
         l1pt_tight_2->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_25 >= .100){
+	l1pt_tight_1_25->Fill(l1Pt_1);
+        l1pt_tight_2_25->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_10 >= .100){
+	l1pt_tight_1_10->Fill(l1Pt_1);
+        l1pt_tight_2_10->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_5 >= .100){
+	l1pt_tight_1_5->Fill(l1Pt_1);
+        l1pt_tight_2_5->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_2 >= .100){
+	l1pt_tight_1_2->Fill(l1Pt_1);
+        l1pt_tight_2_2->Fill(l1Pt_2);
         //std::cout<<"bdt>-.003 l1pt_tight_1 "<<l1pt_tight_1<<std::endl;
         //std::cout<<"bdt>-.003 l1pt_tight_2 "<<l1pt_tight_2<<std::endl;
       }
-      if(bdtDiscriminant >= -.003){
+      if(bdtDiscriminant >= 0.00){
         l1pt_medium_1->Fill(l1Pt_1);
         l1pt_medium_2->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_25 >= 0.00){
+	l1pt_medium_1_25->Fill(l1Pt_1);
+        l1pt_medium_2_25->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_10 >= 0.00){
+	l1pt_medium_1_10->Fill(l1Pt_1);
+        l1pt_medium_2_10->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_5 >= 0.00){
+	l1pt_medium_1_5->Fill(l1Pt_1);
+        l1pt_medium_2_5->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_2 >= 0.00){
+	l1pt_medium_1_2->Fill(l1Pt_1);
+        l1pt_medium_2_2->Fill(l1Pt_2);
+      
         //std::cout<<"bdt>-.183 l1pt_medium_1 "<<l1pt_medium_1<<std::endl;
         //std::cout<<"bdt>-.183 l1pt_medium_2 "<<l1pt_medium_2<<std::endl;
       }
-      if(bdtDiscriminant >= -.027){
+      if(bdtDiscriminant >= -.200){
         l1pt_loose_1->Fill(l1Pt_1);
         l1pt_loose_2->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_25 >= -.200){
+        l1pt_loose_1_25->Fill(l1Pt_1);
+        l1pt_loose_2_25->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_10 >= -.200){
+        l1pt_loose_1_10->Fill(l1Pt_1);
+        l1pt_loose_2_10->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_5 >= -.200){
+        l1pt_loose_1_5->Fill(l1Pt_1);
+        l1pt_loose_2_5->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_2 >= -.200){
+        l1pt_loose_1_2->Fill(l1Pt_1);
+        l1pt_loose_2_2->Fill(l1Pt_2);
         //std::cout<<"bdt>-.308 l1pt_loose_1 "<<l1pt_loose_1<<std::endl;
         //std::cout<<"bdt>-.308 l1pt_loose_2 "<<l1pt_loose_2<<std::endl;
       }
-      if(bdtDiscriminant >= -.100){
+      if(bdtDiscriminant >= -.300){
         l1pt_veryloose_1->Fill(l1Pt_1);
         l1pt_veryloose_2->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_25 >= -.300){
+        l1pt_veryloose_1_25->Fill(l1Pt_1);
+        l1pt_veryloose_2_25->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_10 >= -.300){
+        l1pt_veryloose_1_10->Fill(l1Pt_1);
+        l1pt_veryloose_2_10->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_5 >= -.300){
+        l1pt_veryloose_1_5->Fill(l1Pt_1);
+        l1pt_veryloose_2_5->Fill(l1Pt_2);
+      }
+      if(bdtDiscriminant_2 >= -.300){
+        l1pt_veryloose_1_2->Fill(l1Pt_1);
+        l1pt_veryloose_2_2->Fill(l1Pt_2);
         //std::cout<<"bdt>-.353 l1pt_veryloose_1 "<<l1pt_veryloose_1<<std::endl;
         //std::cout<<"bdt>-.353 l1pt_veryloose_2 "<<l1pt_veryloose_2<<std::endl;
       }
